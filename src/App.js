@@ -46,52 +46,72 @@ const servers = [{
   'ip': '77.244.216.218',
   'volume_id': '52679d68-a2f6-4da7-baa4-ed23dae3ba5c'
 }];
-const panels = (server) => {
+
+const serverDetail = {
+  'id': 'f6a56cf4-d02a-49c7-a555-1b887ac96df9',
+  'ram': 512,
+  'cpus': 1,
+  'os': 'Ubuntu 16.04 LTS 64-bit',
+  'volume': {'size': 10240, 'type': 'fast'}
+};
+
+class Panels extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showDetail: false,
+    };
+  }
+  render() {
+    const server = this.props.server;
+    return (
+      <div>
+        <Panel collapsible header={
+          <h4 onClick={() => this.setState({showDetail: !this.state.showDetail})}>
+            <Glyphicon
+              title={server.status}
+              className={server.status === 'active' ? 'green' : 'red'}
+              glyph={server.status === 'active' ? 'ok-circle' : 'ban-circle'}
+            /> {server.serverName}
+            <small>({server.tags.join(', ')})</small>
+          </h4>
+        }>
+          {this.state.showDetail && serverTable(serverDetail)}
+        </Panel>
+        <Metric/>
+      </div>
+    )
+  }
+};
+
+const serverTable = (serverDetail) => {
   return (
-    <div>
-      <Panel collapsible header={
-        <h4>
-          <Glyphicon
-            title={server.status}
-            className={server.status === 'active' ? 'green' : 'red'}
-            glyph={server.status === 'active' ? 'ok-circle' : 'ban-circle'}
-          /> {server.serverName}
-          <small>({server.tags.join(', ')})</small>
-        </h4>
-      }>
-        <Table>
-          <tbody>
-          <tr>
-            <td><Glyphicon glyph='tag'>{server.id}</Glyphicon></td>
-            <td>{server.region}</td>
-          </tr>
-          <tr>
-            <td>{server.os}</td>
-            <td>{server.dataCenter}</td>
-          </tr>
-          <tr>
-            <td>{server.cpus} vCPU, Память {server.ram} МБ</td>
-            <td>{server.addr}</td>
-          </tr>
-          </tbody>
-        </Table>
-      </Panel>
-      <Metric/>
-    </div>
+    <Table>
+      <tbody>
+      <tr>
+        <td><Glyphicon glyph='tag'>{serverDetail.id}</Glyphicon></td>
+        <td>{serverDetail.region}</td>
+      </tr>
+      <tr>
+        <td>{serverDetail.os}</td>
+        <td>{serverDetail.dataCenter}</td>
+      </tr>
+      <tr>
+        <td>{serverDetail.cpus} vCPU, Память {serverDetail.ram} МБ</td>
+        <td>{serverDetail.addr}</td>
+      </tr>
+      </tbody>
+    </Table>
   )
 };
-const accordion = (panels) => {
-  return (<Accordion>{panels}</Accordion>)
-};
-const base = (
-  <h1>Servers</h1>
-);
 
 class App extends Component {
   render() {
     return [
-      base,
-      accordion(servers.map((server) => panels(server)))
+      <h1>Servers</h1>,
+      <Accordion>
+        {servers.map((s) => <Panels server={s}/>)}
+      </Accordion>
     ];
   }
 }
