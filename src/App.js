@@ -10,6 +10,7 @@ import {
   Panel,
   Accordion,
 } from 'react-bootstrap';
+import Metric from "./Metric";
 
 const servers = [{
   'id': '442d3f41-7204-477d-bc9e-4de6c55717bd',
@@ -75,7 +76,7 @@ const panels = (server) => {
           </tbody>
         </Table>
       </Panel>
-
+      <Metric/>
     </div>
   )
 };
