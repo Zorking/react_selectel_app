@@ -25,14 +25,14 @@ class Panels extends Component {
     };
   }
   getServerDetail() {
-    axios.post('https://itjustworks.me:8443/servers/detail/?viewer_id=1', this.props.server, {'headers':{'Authorization':this.props.token}})
+    axios.post('https://itjustworks.me:8443/servers/detail/'+localStorage.getItem('location'), this.props.server, {'headers':{'Authorization':localStorage.getItem('token')}})
       .then((response) => {
       let qwer = Object.assign({}, response.data, this.props.server);
         this.setState({serverDetail: qwer});
       })
   }
   runAction(actionName){
-    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':this.props.token}})
+    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':localStorage.getItem('token')}})
       .then((response) => {
         console.log('Done')
       })
@@ -53,7 +53,7 @@ class Panels extends Component {
             <small>({server.tags.join(', ')})</small>
           </h4>
           <DropdownButton bsStyle='Danger' title='Actions'>
-            <MenuItem onClick={() => this.runAction('reboot/hard/?viewer_id=1')}>Hard Reboot</MenuItem>
+            <MenuItem onClick={() => this.runAction('reboot/hard/'+localStorage.getItem('location'))}>Hard Reboot</MenuItem>
             <MenuItem >Soft Reboot</MenuItem>
             <MenuItem >Pause</MenuItem>
             <MenuItem >Unpause</MenuItem>
@@ -98,36 +98,28 @@ class App extends Component {
     super(props);
     this.state = {
       servers: [],
-      token: null,
     };
   }
 
   componentWillMount() {
-    this.getToken();
     this.getServers();
   }
 
-  async getToken() {
-    let token = await localStorage.getItem('token');
-    if (!!token) this.setState({token: token});
-  }
-
   getServers() {
-    axios.get('https://itjustworks.me:8443/servers/?viewer_id=1', {'headers':{'Authorization':this.state.token}})
+    axios.get('https://itjustworks.me:8443/servers/'+localStorage.getItem('location'), {'headers':{'Authorization':localStorage.getItem('token')}})
     .then((response) => {
       this.setState({servers: response.data});
-    })
+    }).catch(()=>{ console.log('ups')})
   }
 
   render() {
-    console.log(this.state.token);
-    if (!this.state.token) {
+    if (!localStorage.getItem('token')) {
       return <Login/>
     } else {
       return [
         <h1>Servers</h1>,
         <Accordion>
-          {this.state.servers.map((s) => <Panels token={this.state.token} key={s.id} server={s}/>)}
+          {this.state.servers.map((s) => <Panels key={s.id} server={s}/>)}
         </Accordion>
       ];
     }
@@ -143,12 +135,16 @@ class Login extends Component {
     this.state = {
       apiKey: '',
     };
-    this.login.bind(this);
   }
 
   login() {
     axios.post('https://itjustworks.me:8443/register/'+window.location.search, {'api_token': this.state.apiKey})
-    .then((response) => localStorage.setItem('token', response.data.token))
+    .then((response) => {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('location', window.location.search);
+      console.log(response.data.token);
+    });
+    
   }
 
   render() {
