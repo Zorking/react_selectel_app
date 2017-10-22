@@ -25,14 +25,14 @@ class Panels extends Component {
     };
   }
   getServerDetail() {
-    axios.post('https://itjustworks.me:8443/servers/detail/?viewer_id=1', this.props.server)
+    axios.post('https://itjustworks.me:8443/servers/detail/?viewer_id=1', this.props.server, {'headers':{'Authorization':'123'}})
       .then((response) => {
       let qwer = Object.assign({}, response.data, this.props.server);
         this.setState({serverDetail: qwer});
       })
   }
   runAction(actionName){
-    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name})
+    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':'123'}})
       .then((response) => {
         console.log('Done')
       })
@@ -53,12 +53,12 @@ class Panels extends Component {
             <small>({server.tags.join(', ')})</small>
           </h4>
           <DropdownButton bsStyle='Danger' title='Actions'>
-            <MenuItem eventKey="1" onClick={this.runAction('reboot/hard/')}>Hard Reboot</MenuItem>
-            <MenuItem eventKey="2">Soft Reboot</MenuItem>
-            <MenuItem eventKey="3">Pause</MenuItem>
-            <MenuItem eventKey="4">Unpause</MenuItem>
-            <MenuItem eventKey="5">Start</MenuItem>
-            <MenuItem eventKey="6">Stop</MenuItem>
+            <MenuItem onClick={() => this.runAction('reboot/hard/?viewer_id=1')}>Hard Reboot</MenuItem>
+            <MenuItem >Soft Reboot</MenuItem>
+            <MenuItem >Pause</MenuItem>
+            <MenuItem >Unpause</MenuItem>
+            <MenuItem >Start</MenuItem>
+            <MenuItem >Stop</MenuItem>
           </DropdownButton>
         </div>
         }>
@@ -106,7 +106,7 @@ class App extends Component {
   }
 
   getServers() {
-    axios.get('https://itjustworks.me:8443/servers/?viewer_id=1')
+    axios.get('https://itjustworks.me:8443/servers/?viewer_id=1', {'headers':{'Authorization':'123'}})
     .then((response) => {
       this.setState({servers: response.data});
     })
