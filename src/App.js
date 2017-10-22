@@ -117,10 +117,12 @@ class App extends Component {
     if (!this.state.logined) {
       return <Login self={this}/>
     } else {
-      return [
-        <h1>Сервера</h1>,
-        <Servers self={this}/>
-      ];
+      return (
+        <div className='scroll'>
+        <h1>Сервера</h1>
+        <Servers className="scroll" self={this}/>
+        </div>
+      );
     }
   }
 }
@@ -128,6 +130,7 @@ class App extends Component {
 export default App;
 
 class Servers extends Component {
+
   componentWillMount() {
     this.props.self.getServers();
   }
