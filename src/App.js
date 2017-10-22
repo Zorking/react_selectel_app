@@ -57,7 +57,7 @@ class Panels extends Component {
 
 class ServerTable extends Component {
   runAction(actionName){
-    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':localStorage.getItem('token')}})
+    axios.post('https://itjustworks.me:8443/servers/' + this.props.serverDetail.id + '/' + actionName, {'project_name': this.props.serverDetail.projectName}, {'headers':{'Authorization':localStorage.getItem('token')}})
       .then((response) => {
         console.log('Done')
       })
@@ -99,12 +99,11 @@ class App extends Component {
     super(props);
     this.state = {
       servers: [],
+      logined: !!localStorage.getItem('token'),
     };
   }
 
-  componentWillMount() {
-    this.getServers();
-  }
+
 
   getServers() {
     axios.get('https://itjustworks.me:8443/servers/'+localStorage.getItem('location'), {'headers':{'Authorization':localStorage.getItem('token')}})
@@ -114,20 +113,31 @@ class App extends Component {
   }
 
   render() {
-    if (!localStorage.getItem('token')) {
-      return <Login/>
+    if (!this.state.logined) {
+      return <Login self={this}/>
     } else {
       return [
         <h1>Сервера</h1>,
-        <Accordion>
-          {this.state.servers.map((s) => <Panels server={s}/>)}
-        </Accordion>
+        <Servers self={this}/>
       ];
     }
   }
 }
 
 export default App;
+
+class Servers extends Component {
+  componentWillMount() {
+    this.props.self.getServers();
+  }
+  render() {
+    return (
+      <Accordion>
+        {this.props.self.state.servers.map((s) => <Panels server={s}/>)}
+      </Accordion>
+    )
+  }
+}
 
 
 class Login extends Component {
@@ -138,12 +148,13 @@ class Login extends Component {
     };
   }
 
-  login() {
+  login(go) {
     axios.post('https://itjustworks.me:8443/register/'+window.location.search, {'api_token': this.state.apiKey})
     .then((response) => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('location', window.location.search);
       console.log(response.data.token);
+      go.setState({logined: true});
     });
     
   }
@@ -158,7 +169,7 @@ class Login extends Component {
           onChange={(e) => this.setState({ apiKey: e.target.value })}
         >
         </FormControl>
-        <Button bsStyle="primary" onClick={()=>this.login()}>Login</Button>
+        <Button bsStyle="primary" onClick={()=>this.login(this.props.self)}>Login</Button>
       </div>
     )
   }
