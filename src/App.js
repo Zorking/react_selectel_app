@@ -12,7 +12,8 @@ import {
   Accordion,
   DropdownButton,
   MenuItem,
-  ButtonToolbar
+  ButtonToolbar,
+  FormControl
 } from 'react-bootstrap';
 import Metric from "./Metric";
 
