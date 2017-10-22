@@ -59,7 +59,7 @@ class ServerTable extends Component {
   runAction(actionName){
     axios.post('https://itjustworks.me:8443/servers/' + this.props.serverDetail.id + '/' + actionName, {'project_name': this.props.serverDetail.projectName}, {'headers':{'Authorization':localStorage.getItem('token')}})
       .then((response) => {
-        console.log('Done')
+        alert('Действие успешно выполнено')
       })
   }
   render() {
