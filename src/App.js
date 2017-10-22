@@ -65,13 +65,10 @@ class Panels extends Component {
     };
   }
   getServerDetail() {
-    axios({
-      method: 'get',
-      url: 'http://bit.ly/2mTM3nY',
-      responseType: 'stream',
-      params: this.props.server,
-    })
-      .then((response) => this.setState({serverDetail: response}))
+    axios.post('https://itjustworks.me/servers/detail/?viewer_id=1', this.props.server)
+      .then((response) => {
+        this.setState({serverDetail: response.data});
+      })
   }
 
   render() {
@@ -80,7 +77,7 @@ class Panels extends Component {
     return (
       <div>
         <Panel collapsible header={
-          <h4 onClick={() => this.setState({showDetail: !this.state.showDetail, serverDetail: this.getServerDetail()})}>
+          <h4 onClick={() => {this.setState({showDetail: !this.state.showDetail}); this.getServerDetail()} }>
             <Glyphicon
               title={server.status}
               className={server.status === 'active' ? 'green' : 'red'}
@@ -91,7 +88,6 @@ class Panels extends Component {
         }>
           {this.state.showDetail && <ServerTable serverDetail={this.state.serverDetail}/>}
         </Panel>
-        <Metric/>
       </div>
     )
   }
@@ -129,17 +125,15 @@ class App extends Component {
     };
   }
 
-  componentWillUnmount() {
+  componentWillMount() {
     this.getServers();
   }
 
   getServers() {
-    axios({
-      method: 'get',
-      url: 'http://bit.ly/2mTM3nY',
-      responseType: 'stream'
+    axios.get('https://itjustworks.me/servers/?viewer_id=1')
+    .then((response) => {
+      this.setState({servers: response.data});
     })
-      .then((response) => this.setState({servers: response}))
   }
 
   render() {
