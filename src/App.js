@@ -64,6 +64,7 @@ class ServerTable extends Component {
   }
   render() {
     const serverDetail = this.props.serverDetail;
+    console.log('aaaaaaaaaaaa', serverDetail);
     return (
       <Table>
         <tbody>
@@ -89,6 +90,7 @@ class ServerTable extends Component {
           <Button bsStyle="danger" onClick={() => this.runAction('stop/'+localStorage.getItem('location'))}>Stop</Button>
           {/*<Button bsStyle="primary" onClick={() => this.props.self.setState({showMetric: true})}>Stop</Button>*/}
         </ButtonToolbar>
+        <Bot serverDetail={serverDetail}/>
 
       </Table>
     )
@@ -174,6 +176,58 @@ class Login extends Component {
         >
         </FormControl>
         <Button bsStyle="primary" onClick={()=>this.login(this.props.self)}>Login</Button>
+      </div>
+    )
+  }
+}
+
+class Bot extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      threshold: '',
+      projectName: '',
+      dataType: "ram",
+    };
+  }
+
+  componentDidMount() {
+    setTimeout(()=>{
+      this.getNot(this.props.serverDetail.id);
+      this.setState({projectName: this.props.serverDetail.projectName});
+    }, 1000)
+  }
+
+  getNot(id) {
+    axios.get('https://itjustworks.me:8443/servers/'+id+'/notifications/'+localStorage.getItem('location'), {'headers':{'Authorization':localStorage.getItem('token')}})
+    .then((response) => {
+      this.setState({threshold: response.data[0].threshold});
+    });
+  }
+
+  postNot(id) {
+    axios.post('https://itjustworks.me:8443/servers/'+id+'/notifications/'+localStorage.getItem('location'), {
+      threshold: this.state.threshold,
+      project_name: this.state.projectName,
+      data_type: this.state.dataType,
+    },{'headers':{'Authorization':localStorage.getItem('token')}})
+    .then((response) => {
+      alert('Информация отправлена')
+    });
+  }
+
+  render() {
+    console.log(this.state.threshold);
+    return (
+      <div className="marg">
+        <FormControl
+          type="text"
+          value={this.state.threshold}
+          placeholder="Enter"
+          onChange={(e) => this.setState({ threshold: e.target.value })}
+        >
+        </FormControl>
+        <Button className="marg" bsStyle="primary" onClick={()=>this.postNot(this.props.serverDetail.id)}>Send data to Bot</Button>
       </div>
     )
   }

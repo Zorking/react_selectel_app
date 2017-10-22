@@ -49,3 +49,12 @@
   overflow-y: scroll;
   height:500px;
 }
+.inline {
+  display: inline;
+}
+.space-v {
+  margin-left:5px;
+}
+.marg {
+  margin-top:10px;
+}
