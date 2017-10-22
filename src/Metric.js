@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
+import axios from 'axios';
 
 class Metric extends Component {
   constructor(props) {
@@ -7,10 +8,11 @@ class Metric extends Component {
     this.state = {
       metrics: null,
     };
+    this.getMetrics();
   }
 
-  getMetrics() {'127.0.0.1:8000/servers/f6a56cf4-d02a-49c7-a555-1b887ac96df9/metrics/ram/?viewer_id=19048154&project_name=it_works'
-    axios.post('https://itjustworks.me:8443/servers/'+this.props.serverDetail.id+'/metrics/ram/'+localStorage.getItem('location'), {'project_name': this.props.serverDetail.projectName}, {'headers':{'Authorization':localStorage.getItem('token')}})
+  getMetrics() {
+    axios.get('https://itjustworks.me:8443/servers/'+this.props.serverDetail.id+'/metrics/ram/'+localStorage.getItem('location'), {'project_name': this.props.serverDetail.projectName}, {'headers':{'Authorization':localStorage.getItem('token')}})
       .then((response) => {
         console.log(response.body);
         this.setState({metrics: response.body});
@@ -19,11 +21,12 @@ class Metric extends Component {
   }
 
   render() {
-    const x = this.state.metrics.map((e)=> {
+    const metrics = this.state.metrics;
+    const x = metrics.map((e)=> {
       const d = new Date(e[0]);
       return d.getHours()+':'+d.getMinutes()
     });
-    const y = this.state.metrics.map((e)=> e[2] );
+    const y = metrics.map((e)=> e[2] );
     const data = {
       labels: x,
       datasets: [

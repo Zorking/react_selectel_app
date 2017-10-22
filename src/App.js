@@ -40,13 +40,12 @@ class Panels extends Component {
 
     return (
       <Panel collapsible header={
-        <h4 onClick={() => {
-          this.setState({showDetail: !this.state.showDetail});
-          this.getServerDetail()
-        }}>
-          <label>Имя сервера:</label> {server.serverName}
-          <label>Теги:</label> {server.tags.join(', ')}
-          <label>Статус:</label> {server.status}
+        <h4 onClick={() => {this.setState({showDetail: !this.state.showDetail}); this.getServerDetail()} }>
+          <Glyphicon
+            title={server.status}
+            className={server.status === 'active' ? 'green' : 'red'}
+            glyph={server.status === 'active' ? 'ok-circle' : 'ban-circle'}
+          /> {server.serverName}
         </h4>
       }>
         {this.state.showDetail && !this.state.showMetric && <ServerTable serverDetail={this.state.serverDetail}/>}
@@ -88,6 +87,7 @@ class ServerTable extends Component {
           <Button bsStyle="success" onClick={() => this.runAction('unpause/'+localStorage.getItem('location'))}>Unpause</Button>
           <Button bsStyle="success" onClick={() => this.runAction('start/'+localStorage.getItem('location'))}>Start</Button>
           <Button bsStyle="danger" onClick={() => this.runAction('stop/'+localStorage.getItem('location'))}>Stop</Button>
+          {/*<Button bsStyle="primary" onClick={() => this.props.self.setState({showMetric: true})}>Stop</Button>*/}
         </ButtonToolbar>
 
       </Table>
