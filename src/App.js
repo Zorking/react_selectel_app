@@ -6,12 +6,13 @@ import axios from 'axios';
 import {
   Table,
   Button,
-  FormControl,
+  // Label,
   Glyphicon,
   Panel,
   Accordion,
   DropdownButton,
   MenuItem,
+  ButtonToolbar
 } from 'react-bootstrap';
 import Metric from "./Metric";
 
@@ -24,17 +25,12 @@ class Panels extends Component {
       serverDetail: [],
     };
   }
+
   getServerDetail() {
     axios.post('https://itjustworks.me:8443/servers/detail/?viewer_id=1', this.props.server, {'headers':{'Authorization':this.props.token}})
       .then((response) => {
-      let qwer = Object.assign({}, response.data, this.props.server);
+        let qwer = Object.assign({}, response.data, this.props.server);
         this.setState({serverDetail: qwer});
-      })
-  }
-  runAction(actionName){
-    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':this.props.token}})
-      .then((response) => {
-        console.log('Done')
       })
   }
 
@@ -42,34 +38,29 @@ class Panels extends Component {
     const server = this.props.server;
 
     return (
-      <div>
-        <Panel collapsible header={<div>
-          <h4 onClick={() => {this.setState({showDetail: !this.state.showDetail}); this.getServerDetail()} }>
-            <Glyphicon
-              title={server.status}
-              className={server.status === 'active' ? 'green' : 'red'}
-              glyph={server.status === 'active' ? 'ok-circle' : 'ban-circle'}
-            /> {server.serverName}
-            <small>({server.tags.join(', ')})</small>
-          </h4>
-          <DropdownButton bsStyle='Danger' title='Actions'>
-            <MenuItem onClick={() => this.runAction('reboot/hard/?viewer_id=1')}>Hard Reboot</MenuItem>
-            <MenuItem >Soft Reboot</MenuItem>
-            <MenuItem >Pause</MenuItem>
-            <MenuItem >Unpause</MenuItem>
-            <MenuItem >Start</MenuItem>
-            <MenuItem >Stop</MenuItem>
-          </DropdownButton>
-        </div>
-        }>
-          {this.state.showDetail && <ServerTable serverDetail={this.state.serverDetail}/>}
-        </Panel>
-      </div>
+      <Panel collapsible header={
+        <h4 onClick={() => {
+          this.setState({showDetail: !this.state.showDetail});
+          this.getServerDetail()
+        }}>
+          <label>Имя сервера:</label> {server.serverName}
+          <label>Теги:</label> {server.tags.join(', ')}
+          <label>Статус:</label> {server.status}
+        </h4>
+      }>
+        {this.state.showDetail && <ServerTable serverDetail={this.state.serverDetail}/>}
+      </Panel>
     )
   }
 }
 
 class ServerTable extends Component {
+  runAction(actionName){
+    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':this.props.token}})
+      .then((response) => {
+        console.log('Done')
+      })
+  }
   render() {
     const serverDetail = this.props.serverDetail;
     return (
@@ -88,10 +79,19 @@ class ServerTable extends Component {
           <td></td>
         </tr>
         </tbody>
+        <ButtonToolbar>
+          <Button bsStyle="danger" onClick={() => this.runAction('reboot/hard/?viewer_id=1')}>Hard Reboot</Button>
+          <Button bsStyle="warning" onClick={() => this.runAction('reboot/soft/?viewer_id=1')}>Soft Reboot</Button>
+          <Button bsStyle="warning" onClick={() => this.runAction('pause/?viewer_id=1')}>Pause</Button>
+          <Button bsStyle="success" onClick={() => this.runAction('unpause/?viewer_id=1')}>Unpause</Button>
+          <Button bsStyle="success" onClick={() => this.runAction('start/?viewer_id=1')}>Start</Button>
+          <Button bsStyle="danger" onClick={() => this.runAction('stop/?viewer_id=1')}>Stop</Button>
+        </ButtonToolbar>
+
       </Table>
     )
   }
-};
+}
 
 class App extends Component {
   constructor(props) {
@@ -125,9 +125,9 @@ class App extends Component {
       return <Login/>
     } else {
       return [
-        <h1>Servers</h1>,
+        <h1>Сервера</h1>,
         <Accordion>
-          {this.state.servers.map((s) => <Panels token={this.state.token} key={s.id} server={s}/>)}
+          {this.state.servers.map((s) => <Panels server={s}/>)}
         </Accordion>
       ];
     }
