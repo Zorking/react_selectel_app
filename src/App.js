@@ -6,7 +6,7 @@ import axios from 'axios';
 import {
   Table,
   Button,
-  // Label,
+  FormControl,
   Glyphicon,
   Panel,
   Accordion,
@@ -25,14 +25,14 @@ class Panels extends Component {
     };
   }
   getServerDetail() {
-    axios.post('https://itjustworks.me:8443/servers/detail/?viewer_id=1', this.props.server, {'headers':{'Authorization':'123'}})
+    axios.post('https://itjustworks.me:8443/servers/detail/?viewer_id=1', this.props.server, {'headers':{'Authorization':this.props.token}})
       .then((response) => {
       let qwer = Object.assign({}, response.data, this.props.server);
         this.setState({serverDetail: qwer});
       })
   }
   runAction(actionName){
-    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':'123'}})
+    axios.post('https://itjustworks.me:8443/servers/' + this.props.server.id + '/' + actionName, {'project_name': this.props.server.project_name}, {'headers':{'Authorization':this.props.token}})
       .then((response) => {
         console.log('Done')
       })
@@ -98,28 +98,71 @@ class App extends Component {
     super(props);
     this.state = {
       servers: [],
+      token: null,
     };
   }
 
   componentWillMount() {
+    this.getToken();
     this.getServers();
   }
 
+  async getToken() {
+    let token = await localStorage.getItem('token');
+    if (!!token) this.setState({token: token});
+  }
+
   getServers() {
-    axios.get('https://itjustworks.me:8443/servers/?viewer_id=1', {'headers':{'Authorization':'123'}})
+    axios.get('https://itjustworks.me:8443/servers/?viewer_id=1', {'headers':{'Authorization':this.state.token}})
     .then((response) => {
       this.setState({servers: response.data});
     })
   }
 
   render() {
-    return [
-      <h1>Servers</h1>,
-      <Accordion>
-        {this.state.servers.map((s) => <Panels key={s.id} server={s}/>)}
-      </Accordion>
-    ];
+    console.log(this.state.token);
+    if (!this.state.token) {
+      return <Login/>
+    } else {
+      return [
+        <h1>Servers</h1>,
+        <Accordion>
+          {this.state.servers.map((s) => <Panels token={this.state.token} key={s.id} server={s}/>)}
+        </Accordion>
+      ];
+    }
   }
 }
 
 export default App;
+
+
+class Login extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      apiKey: '',
+    };
+    this.login.bind(this);
+  }
+
+  login() {
+    axios.post('https://itjustworks.me:8443/register/'+window.location.search, {'api_token': this.state.apiKey})
+    .then((response) => localStorage.setItem('token', response.data.token))
+  }
+
+  render() {
+    return (
+      <div>
+        <FormControl
+          type="text"
+          value={this.state.apiKey}
+          placeholder="Enter API-KEY"
+          onChange={(e) => this.setState({ apiKey: e.target.value })}
+        >
+        </FormControl>
+        <Button bsStyle="primary" onClick={()=>this.login()}>Login</Button>
+      </div>
+    )
+  }
+}
