@@ -49,7 +49,8 @@ class Panels extends Component {
           <label>Статус:</label> {server.status}
         </h4>
       }>
-        {this.state.showDetail && <ServerTable serverDetail={this.state.serverDetail}/>}
+        {this.state.showDetail && !this.state.showMetric && <ServerTable serverDetail={this.state.serverDetail}/>}
+        {this.state.showMetric && <Metric serverDetail={this.state.serverDetail}/>}
       </Panel>
     )
   }
